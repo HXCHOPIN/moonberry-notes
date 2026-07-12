@@ -125,6 +125,7 @@
   }
   .nav-btn.next{ right:14px; }
   .nav-btn.prev{ left:14px; }
+  .nav-btn.music{ top:20px; right:14px; transform:none; font-size:16px; }
   .nav-btn svg{ width:20px; height:20px; }
   .nav-btn[hidden]{ display:none; }
 
@@ -225,7 +226,7 @@
     <div class="badge">A little something for</div>
     <h1 id="cover-name">Governor XBB 🎂</h1>
     <div class="duo-wrap" id="mascot0"></div>
-    <p class="subtle">Before you keep scrolling your phone at 12am, open this instead.</p>
+    <p class="subtle">Before you keep scrolling your phone at 2am, open this instead.</p>
     <button class="cta" onclick="goTo(1)">Open it →</button>
   </section>
 
@@ -287,6 +288,7 @@
 
 <button class="nav-btn prev" id="prevBtn" onclick="goTo(current-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
 <button class="nav-btn next" id="nextBtn" onclick="goTo(current+1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+<button class="nav-btn music" id="musicToggle" onclick="toggleMusic()">🔊</button>
 <div class="dots" id="dots"></div>
 
 <script>
@@ -305,21 +307,53 @@ const CONFIG = {
   diveMessage: "Every dive you take, I'm rooting for you from the surface.",
   finalNote: "Wishing you a year as bright as your smile — full of snow, saltwater, and everything you love.",
 
-  // Photo gallery: put your image files inside the "images" folder next to
-  // this HTML file, then list the filenames + captions here, in order.
-  // Leave "src" empty ("") to show a placeholder card instead.
+  // Photo gallery: for TRUE privacy, encrypt your photos first using the
+  // included encrypt-photos.html tool (open it locally, drag your photos in,
+  // use the SAME passcode as above) — it outputs .enc files. Put those in the
+  // "images" folder and list them below. They stay unreadable to anyone
+  // browsing the repo directly; only this page, with the right passcode, can
+  // unscramble them.
+  // (If you don't care about that extra step, plain .jpg files also still work.)
   photos: [
-    { src: "photo1.enc", caption: "LOVE" },
-    { src: "photo2.enc", caption: "YOU" },
-    { src: "photo3.enc", caption: "EVERY" },
-    { src: "photo4.enc", caption: "DAY" }
+    { src: "photo1-2.enc", caption: "Love" },
+    { src: "photo2-2.enc", caption: "You" },
+    { src: "photo3-2.enc", caption: "Every" },
+    { src: "photo4-2.enc", caption: "Day" }
   ],
+
   // Background music — drop an mp3 into an "audio" folder next to this file
   // and point this at it. Leave as "" for no music.
   musicFile: "song.mp3",
   musicVolume: 0.45
 };
 /* =============================================================================================== */
+
+/* This salt must match the one in encrypt-photos.html exactly — it's not a
+   secret by itself, it just needs to be identical on both sides so the same
+   passcode always produces the same decryption key. */
+const CRYPTO_SALT = "governor-xbb-birthday-2026";
+
+async function deriveKey(passphrase){
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode(CRYPTO_SALT), iterations: 150000, hash: 'SHA-256' },
+    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
+  );
+}
+async function decryptPhoto(url, key){
+  const buf = await fetch(url).then(r=>{
+    if(!r.ok) throw new Error('missing file');
+    return r.arrayBuffer();
+  });
+  const bytes = new Uint8Array(buf);
+  const iv = bytes.slice(0,12);
+  const data = bytes.slice(12);
+  const plainBuf = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, data);
+  return URL.createObjectURL(new Blob([plainBuf]));
+}
 
 document.getElementById('cover-name').textContent = CONFIG.name + " 🎂";
 document.getElementById('ski-msg').textContent = CONFIG.skiMessage;
@@ -329,33 +363,57 @@ document.getElementById('love-note').textContent = CONFIG.finalNote;
 /* ---------- lock screen ---------- */
 const LOCK_KEY = 'bday_unlocked_' + CONFIG.name.replace(/\s+/g,'_');
 const lockOverlay = document.getElementById('lockOverlay');
-function tryUnlock(){
-  const val = document.getElementById('lockInput').value.trim().toLowerCase();
+async function tryUnlock(){
+  const raw = document.getElementById('lockInput').value.trim();
+  const val = raw.toLowerCase();
   if(val && val === CONFIG.passcode.trim().toLowerCase()){
     sessionStorage.setItem(LOCK_KEY, '1');
     lockOverlay.setAttribute('data-open','true');
+    unlockContent(CONFIG.passcode.trim().toLowerCase());
   } else {
     document.getElementById('lockError').textContent = "That's not quite it — try again.";
   }
 }
+function unlockContent(passphrase){
+  loadGallery(passphrase);
+  startMusic();
+}
 if(sessionStorage.getItem(LOCK_KEY) === '1'){
   lockOverlay.setAttribute('data-open','true');
+  // Note: encrypted photos still need the real passcode to decrypt — a
+  // returning visit within the same browser session skips the typed prompt
+  // but can't re-derive the key, so encrypted photos will show a placeholder
+  // until the passcode is entered again. This is expected, not a bug.
+}
+
+/* ---------- background music ---------- */
+let musicStarted = false;
+const bgm = CONFIG.musicFile ? new Audio(CONFIG.musicFile) : null;
+if(bgm){ bgm.loop = true; bgm.volume = CONFIG.musicVolume; }
+else { const mt = document.getElementById('musicToggle'); if(mt) mt.hidden = true; }
+function startMusic(){
+  if(!bgm || musicStarted) return;
+  musicStarted = true;
+  bgm.play().catch(()=>{ /* autoplay blocked — the mute toggle still lets her start it manually */ });
+}
+function toggleMusic(){
+  if(!bgm) return;
+  if(bgm.paused){ bgm.play().catch(()=>{}); } else { bgm.pause(); }
+  document.getElementById('musicToggle').textContent = bgm.paused ? '🔇' : '🔊';
 }
 
 /* ---------- photo gallery build ---------- */
 const galleryEl = document.getElementById('gallery');
 const cameraIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+const galleryFrames = [];
 CONFIG.photos.forEach(p=>{
   const card = document.createElement('div');
   card.className = 'photo-card';
   const frame = document.createElement('div');
   frame.className = 'frame';
   if(p.src){
-    const img = document.createElement('img');
-    img.src = p.src;
-    img.alt = p.caption || 'photo';
-    img.onerror = ()=>{ frame.innerHTML = `<div class="placeholder">${cameraIcon}<span>add ${p.src.split('/').pop()}</span></div>`; };
-    frame.appendChild(img);
+    frame.innerHTML = `<div class="placeholder">${cameraIcon}<span>unlock to view</span></div>`;
+    galleryFrames.push({frame, src: p.src});
   } else {
     frame.innerHTML = `<div class="placeholder">${cameraIcon}<span>add a photo</span></div>`;
   }
@@ -368,6 +426,30 @@ CONFIG.photos.forEach(p=>{
   }
   galleryEl.appendChild(card);
 });
+
+async function loadGallery(passphrase){
+  if(galleryFrames.length === 0) return;
+  const encryptedOnes = galleryFrames.filter(g => g.src.endsWith('.enc'));
+  let key = null;
+  if(encryptedOnes.length){ key = await deriveKey(passphrase); }
+  for(const g of galleryFrames){
+    try{
+      let url;
+      if(g.src.endsWith('.enc')){
+        url = await decryptPhoto(g.src, key);
+      } else {
+        url = g.src;
+      }
+      const img = document.createElement('img');
+      img.src = url;
+      img.onerror = ()=>{ g.frame.innerHTML = `<div class="placeholder">${cameraIcon}<span>couldn't load ${g.src.split('/').pop()}</span></div>`; };
+      g.frame.innerHTML = '';
+      g.frame.appendChild(img);
+    } catch(e){
+      g.frame.innerHTML = `<div class="placeholder">${cameraIcon}<span>add ${g.src.split('/').pop()}</span></div>`;
+    }
+  }
+}
 
 /* ---------- mascot — fluffy poof-style puppy, reused across scenes ---------- */
 const BODY_PATH = "M 110.0 28.6 C 120.6 28.6, 129.9 45.5, 141.7 49.8 C 153.5 54.2, 173.4 48.1, 180.9 54.8 C 188.4 61.5, 181.6 79.2, 186.5 89.8 C 191.4 100.3, 210.3 108.6, 210.3 118.0 C 210.3 127.4, 191.4 135.7, 186.5 146.2 C 181.6 156.8, 188.4 174.5, 180.9 181.2 C 173.4 187.9, 153.5 181.8, 141.7 186.2 C 129.9 190.5, 120.6 207.4, 110.0 207.4 C 99.4 207.4, 90.1 190.5, 78.3 186.2 C 66.5 181.8, 46.6 187.9, 39.1 181.2 C 31.6 174.5, 38.4 156.8, 33.5 146.2 C 28.6 135.7, 9.7 127.4, 9.7 118.0 C 9.7 108.6, 28.6 100.3, 33.5 89.8 C 38.4 79.2, 31.6 61.5, 39.1 54.8 C 46.6 48.1, 66.5 54.2, 78.3 49.8 C 90.1 45.5, 99.4 28.6, 110.0 28.6 Z";
