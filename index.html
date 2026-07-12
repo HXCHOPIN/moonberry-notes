@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Happy Birthday, Governor XBB</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<style>
+
+  /* ============================================================
+     EASY EDIT GUIDE — everything you'd want to change lives in
+     ONE place: the CONFIG object near the top of the <script>
+     at the bottom of this file. Search for "EDIT ME BELOW".
+     - Her name, birthday date, messages -> CONFIG object
+     - Real photos -> put image files in the "images" folder next
+       to this file, then list their filenames in CONFIG.photos
+     No other part of this file needs to be touched.
+     ============================================================ */
+
+  :root{
+    --font-display: ui-rounded, 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Heiti SC', sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', 'Heiti SC', Arial, sans-serif;
+    --cream:#FFF8EE;
+    --ink:#3D3450;
+    --ink-soft:#7A7189;
+    --sky:#8FD3F4;
+    --sky-deep:#4FA9DB;
+    --ocean:#2FB6B0;
+    --ocean-deep:#116E75;
+    --peach:#FFB4A0;
+    --sun:#FFC94A;
+    --pink:#FF9FB0;
+    --lilac:#E7C9F2;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; width:100%; height:100%; overflow:hidden; overscroll-behavior:none;}
+  body{
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:var(--cream);
+    position:relative;
+    height:100dvh;
+  }
+  .stage{
+    position:fixed; inset:0;
+    display:flex;
+    width:600%; height:100dvh;
+    transition:transform .7s cubic-bezier(.65,0,.35,1);
+  }
+  .scene{
+    width:16.6667%; height:100%;
+    position:relative;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center;
+    padding:6vh 8vw 10vh;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  #scene0{background:linear-gradient(180deg,#FFF8EE 0%, #FFE9CE 100%);}
+  #scene1{background:linear-gradient(180deg,#FFEFD8 0%, #FFD9B0 100%);}
+  #scene2{background:linear-gradient(180deg, var(--sky) 0%, var(--sky-deep) 100%);}
+  #scene3{background:linear-gradient(180deg, var(--ocean) 0%, var(--ocean-deep) 100%);}
+  #scene4{background:linear-gradient(180deg,#FFF3E4 0%, var(--lilac) 100%);}
+  #scene5{background:linear-gradient(180deg,#FFC1D1 0%, var(--pink) 100%);}
+
+  h1,h2{
+    font-family:var(--font-display);
+    font-weight:800;
+    margin:0 0 .4em;
+    line-height:1.15;
+  }
+  h1{font-size:clamp(28px,7vw,42px);}
+  h2{font-size:clamp(22px,6vw,32px);}
+  p{font-size:clamp(15px,4vw,18px); line-height:1.6; margin:0 0 .6em; max-width:420px;}
+  .light-text, .light-text h2, .light-text p{color:#fff;}
+  .light-text .subtle{color:rgba(255,255,255,.85);}
+  .dark-text{color:var(--ink);}
+  .dark-text .subtle{color:var(--ink-soft);}
+
+  .mascot-wrap{ width:min(50vw,190px); margin:0 auto 1em; position:relative; }
+  .mascot-wrap svg{ width:100%; height:auto; display:block; }
+
+  .duo-wrap{ display:flex; align-items:flex-end; justify-content:center; gap:6px; margin:0 auto .8em; }
+  .duo-wrap .half{ width:min(34vw,130px); }
+  .duo-wrap .half svg{ width:100%; height:auto; display:block; }
+
+  .message-box{
+    width:100%; max-width:340px; margin-top:1em;
+    background:rgba(255,255,255,.55); border-radius:18px; padding:14px 16px;
+  }
+  .message-label{
+    font-family:var(--font-display); font-weight:700; font-size:14px; margin:0 0 8px; color:#fff;
+  }
+  .message-box textarea{
+    width:100%; min-height:64px; resize:vertical; border-radius:12px; border:none;
+    padding:10px 12px; font-family:var(--font-body); font-size:14px; color:var(--ink);
+    background:#fff; box-sizing:border-box;
+  }
+  button.cta.small{ font-size:13px; padding:9px 20px; margin-top:8px; }
+  .message-status{ font-size:12px; margin:8px 0 0; min-height:16px; color:#fff; }
+
+  .badge{
+    display:inline-block; padding:6px 16px; border-radius:999px;
+    font-size:12px; letter-spacing:.06em; font-weight:700; text-transform:uppercase;
+    background:rgba(255,255,255,.35); margin-bottom:14px;
+  }
+  .dark-text .badge{ background:#fff2e0; color:#B5651D; }
+
+  .dots{
+    position:absolute; bottom:22px; left:0; right:0;
+    display:flex; justify-content:center; gap:8px; z-index:20;
+  }
+  .dot{ width:7px; height:7px; border-radius:50%; background:rgba(0,0,0,.18); transition:.3s; }
+  .dot.active{ width:20px; border-radius:5px; background:var(--ink); }
+  .light-scene-active .dot{ background:rgba(255,255,255,.45); }
+  .light-scene-active .dot.active{ background:#fff; }
+
+  .nav-btn{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:40px; height:40px; border-radius:50%; border:none;
+    background:rgba(255,255,255,.35); backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:25; color:#3D3450;
+  }
+  .nav-btn.next{ right:14px; }
+  .nav-btn.prev{ left:14px; }
+  .nav-btn svg{ width:20px; height:20px; }
+  .nav-btn[hidden]{ display:none; }
+
+  .countdown{ display:flex; gap:10px; margin:.6em 0 1em; }
+  .cd-box{ background:rgba(255,255,255,.55); border-radius:14px; padding:10px 14px; min-width:56px; }
+  .cd-num{ font-family:var(--font-display); font-weight:800; font-size:clamp(22px,6vw,30px); display:block; }
+  .cd-label{ font-size:10px; letter-spacing:.08em; text-transform:uppercase; opacity:.75; }
+
+  button.cta{
+    font-family:var(--font-display); font-weight:700; font-size:16px;
+    border:none; border-radius:999px; padding:12px 30px; margin-top:.6em;
+    background:#fff; color:var(--ink); cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,.12);
+  }
+  button.cta:active{ transform:scale(.97); }
+
+  .snowfall{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .flake{ position:absolute; top:-10px; border-radius:50%; background:#fff; opacity:.85; animation:fall linear infinite; }
+  @keyframes fall{ to{ transform:translateY(115vh); } }
+
+  .bubbles{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .bubble{ position:absolute; bottom:-30px; border-radius:50%; border:1.5px solid rgba(255,255,255,.6); background:rgba(255,255,255,.12); animation:rise linear infinite; }
+  @keyframes rise{ to{ transform:translateY(-120vh); } }
+
+  .confetti-layer{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:5; }
+  .confetto{ position:absolute; top:-14px; width:8px; height:14px; opacity:0; animation:drop 2.6s ease-in forwards; }
+  @keyframes drop{
+    0%{ opacity:1; transform:translateY(0) rotate(0deg); }
+    100%{ opacity:.9; transform:translateY(110vh) rotate(540deg); }
+  }
+
+  .love-note{
+    background:rgba(255,255,255,.5); border-radius:18px; padding:14px 18px;
+    font-family:var(--font-display); font-size:clamp(14px,4vw,16px); font-weight:500;
+    max-width:400px; margin-top:.8em;
+  }
+
+  /* ---- photo gallery ---- */
+  .gallery-scroll{
+    display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory;
+    width:100%; max-width:420px; padding:6px 4px 14px; margin-top:.4em;
+    -webkit-overflow-scrolling:touch;
+  }
+  .gallery-scroll::-webkit-scrollbar{ height:5px; }
+  .photo-card{
+    scroll-snap-align:center; flex:0 0 auto; width:150px;
+    background:#fff; border-radius:16px; padding:8px 8px 12px;
+    box-shadow:0 6px 16px rgba(0,0,0,.1); text-align:center;
+  }
+  .photo-card .frame{
+    width:100%; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
+    background:#F3ECFB; display:flex; align-items:center; justify-content:center;
+    margin-bottom:8px;
+  }
+  .photo-card img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-card .placeholder{ color:#B7A6D4; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .photo-card .placeholder svg{ width:26px; height:26px; }
+  .photo-card .placeholder span{ font-size:10px; line-height:1.3; padding:0 6px; }
+  .photo-card .caption{ font-size:12px; color:var(--ink-soft); }
+  .swipe-hint{ font-size:12px; color:var(--ink-soft); margin-top:-4px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .flake,.bubble,.confetto{ animation:none !important; display:none; }
+  }
+
+  .lock-overlay{
+    position:fixed; inset:0; z-index:100;
+    background:linear-gradient(180deg,#FFF8EE 0%, #FFE9CE 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:8vh 10vw; gap:4px;
+  }
+  .lock-overlay .mascot-wrap{ width:min(40vw,140px); }
+  .lock-overlay input{
+    font-family:var(--font-body); font-size:16px; text-align:center;
+    border:none; border-radius:999px; padding:12px 20px; margin-top:12px;
+    width:100%; max-width:220px; background:rgba(255,255,255,.7); color:var(--ink);
+    box-sizing:border-box;
+  }
+  .lock-overlay input:focus{ outline:2px solid rgba(0,0,0,.15); }
+  .lock-error{ font-size:13px; color:#B5453D; min-height:18px; margin-top:6px; }
+  .lock-overlay[data-open="true"]{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="lock-overlay" id="lockOverlay">
+  <div class="mascot-wrap" id="lockMascot"></div>
+  <h2>Just for you</h2>
+  <p class="subtle" style="color:var(--ink-soft)">Enter our little word to open it.</p>
+  <input type="text" id="lockInput" autocomplete="off" placeholder="Type it here" onkeydown="if(event.key==='Enter')tryUnlock()">
+  <button class="cta" onclick="tryUnlock()">Unlock 🔓</button>
+  <p class="lock-error" id="lockError"></p>
+</div>
+
+<div class="stage" id="stage">
+
+  <section class="scene dark-text" id="scene0">
+    <div class="badge">A little something for</div>
+    <h1 id="cover-name">Governor XBB 🎂</h1>
+    <div class="duo-wrap" id="mascot0"></div>
+    <p class="subtle">Before you keep scrolling your phone at 12am, open this instead.</p>
+    <button class="cta" onclick="goTo(1)">Open it →</button>
+  </section>
+
+  <section class="scene dark-text" id="scene1">
+    <div class="badge">Save the date</div>
+    <h2>Your day is coming</h2>
+    <p class="subtle">Counting down to the best day of the year.</p>
+    <div class="countdown" id="countdown">
+      <div class="cd-box"><span class="cd-num" id="cd-days">00</span><span class="cd-label">days</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-hours">00</span><span class="cd-label">hrs</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-mins">00</span><span class="cd-label">min</span></div>
+    </div>
+    <button class="cta" onclick="goTo(2)">Keep going →</button>
+  </section>
+
+  <section class="scene light-text" id="scene2">
+    <div class="snowfall" id="snowfall"></div>
+    <div class="badge">Mountain mode</div>
+    <h2>Fast on the slopes,<br>faster into my heart</h2>
+    <div class="mascot-wrap" id="mascot2"></div>
+    <p class="subtle" id="ski-msg"></p>
+    <button class="cta" onclick="goTo(3)">Dive in →</button>
+  </section>
+
+  <section class="scene light-text" id="scene3">
+    <div class="bubbles" id="bubbles"></div>
+    <div class="badge">Deep breath</div>
+    <h2>The ocean's lucky<br>to have you visit</h2>
+    <div class="mascot-wrap" id="mascot3"></div>
+    <p class="subtle" id="dive-msg"></p>
+    <button class="cta" onclick="goTo(4)">Take a look back →</button>
+  </section>
+
+  <section class="scene dark-text" id="scene4">
+    <div class="badge">A few of my favorites</div>
+    <h2>My Beautiful Girl</h2>
+    <div class="gallery-scroll" id="gallery"></div>
+    <p class="swipe-hint">← swipe through →</p>
+    <button class="cta" onclick="goTo(5)">Last one →</button>
+  </section>
+
+  <section class="scene light-text" id="scene5">
+    <div class="confetti-layer" id="confetti"></div>
+    <div class="badge">Finally</div>
+    <h1>Happy Birthday!</h1>
+    <div class="duo-wrap" id="mascot5"></div>
+    <div class="love-note" id="love-note"></div>
+    <button class="cta" onclick="burstConfetti()">Make a wish 🎉</button>
+
+    <div class="message-box">
+      <p class="message-label">Leave me something back</p>
+      <textarea id="message-input" placeholder="Write me anything — a wish, a thank you, whatever's on your mind..."></textarea>
+      <button class="cta small" onclick="saveMessage()">Save & copy 💌</button>
+      <p class="message-status" id="message-status"></p>
+    </div>
+  </section>
+
+</div>
+
+<button class="nav-btn prev" id="prevBtn" onclick="goTo(current-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+<button class="nav-btn next" id="nextBtn" onclick="goTo(current+1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+<div class="dots" id="dots"></div>
+
+<script>
+
+/* ================= EDIT ME BELOW — this is the only part you need to touch ================= */
+const CONFIG = {
+  name: "Governor XBB",
+  birthdayMonth: 7,      // July
+  birthdayDay: 16,
+
+  // A private word/phrase only she'd know — this keeps the page from being
+  // openly viewable to anyone who stumbles on the link. Case-insensitive.
+  passcode: "ilovexbb",
+
+  skiMessage: "Here's to more colorful days, sore legs, and hot milky tea after.",
+  diveMessage: "Every dive you take, I'm rooting for you from the surface.",
+  finalNote: "Wishing you a year as bright as your smile — full of snow, saltwater, and everything you love.",
+
+  // Photo gallery: put your image files inside the "images" folder next to
+  // this HTML file, then list the filenames + captions here, in order.
+  // Leave "src" empty ("") to show a placeholder card instead.
+  photos: [
+    { src: "images/1.jpg", caption: "LOVE" },
+    { src: "images/2.jpg", caption: "YOU" },
+    { src: "images/3.jpg", caption: "EVERY" },
+    { src: "images/4.jpg", caption: "DAY" }
+  ]
+};
+/* =============================================================================================== */
+
+document.getElementById('cover-name').textContent = CONFIG.name + " 🎂";
+document.getElementById('ski-msg').textContent = CONFIG.skiMessage;
+document.getElementById('dive-msg').textContent = CONFIG.diveMessage;
+document.getElementById('love-note').textContent = CONFIG.finalNote;
+
+/* ---------- lock screen ---------- */
+const LOCK_KEY = 'bday_unlocked_' + CONFIG.name.replace(/\s+/g,'_');
+const lockOverlay = document.getElementById('lockOverlay');
+function tryUnlock(){
+  const val = document.getElementById('lockInput').value.trim().toLowerCase();
+  if(val && val === CONFIG.passcode.trim().toLowerCase()){
+    sessionStorage.setItem(LOCK_KEY, '1');
+    lockOverlay.setAttribute('data-open','true');
+  } else {
+    document.getElementById('lockError').textContent = "That's not quite it — try again.";
+  }
+}
+if(sessionStorage.getItem(LOCK_KEY) === '1'){
+  lockOverlay.setAttribute('data-open','true');
+}
+
+/* ---------- photo gallery build ---------- */
+const galleryEl = document.getElementById('gallery');
+const cameraIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+CONFIG.photos.forEach(p=>{
+  const card = document.createElement('div');
+  card.className = 'photo-card';
+  const frame = document.createElement('div');
+  frame.className = 'frame';
+  if(p.src){
+    const img = document.createElement('img');
+    img.src = p.src;
+    img.alt = p.caption || 'photo';
+    img.onerror = ()=>{ frame.innerHTML = `<div class="placeholder">${cameraIcon}<span>add ${p.src.split('/').pop()}</span></div>`; };
+    frame.appendChild(img);
+  } else {
+    frame.innerHTML = `<div class="placeholder">${cameraIcon}<span>add a photo</span></div>`;
+  }
+  card.appendChild(frame);
+  if(p.caption){
+    const cap = document.createElement('div');
+    cap.className = 'caption';
+    cap.textContent = p.caption;
+    card.appendChild(cap);
+  }
+  galleryEl.appendChild(card);
+});
+
+/* ---------- mascot — fluffy poof-style puppy, reused across scenes ---------- */
+const BODY_PATH = "M 110.0 28.6 C 120.6 28.6, 129.9 45.5, 141.7 49.8 C 153.5 54.2, 173.4 48.1, 180.9 54.8 C 188.4 61.5, 181.6 79.2, 186.5 89.8 C 191.4 100.3, 210.3 108.6, 210.3 118.0 C 210.3 127.4, 191.4 135.7, 186.5 146.2 C 181.6 156.8, 188.4 174.5, 180.9 181.2 C 173.4 187.9, 153.5 181.8, 141.7 186.2 C 129.9 190.5, 120.6 207.4, 110.0 207.4 C 99.4 207.4, 90.1 190.5, 78.3 186.2 C 66.5 181.8, 46.6 187.9, 39.1 181.2 C 31.6 174.5, 38.4 156.8, 33.5 146.2 C 28.6 135.7, 9.7 127.4, 9.7 118.0 C 9.7 108.6, 28.6 100.3, 33.5 89.8 C 38.4 79.2, 31.6 61.5, 39.1 54.8 C 46.6 48.1, 66.5 54.2, 78.3 49.8 C 90.1 45.5, 99.4 28.6, 110.0 28.6 Z";
+
+function puppySVG(opts){
+  opts = opts || {};
+  return `
+  <svg viewBox="0 0 220 225" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="110" cy="216" rx="58" ry="7" fill="rgba(0,0,0,.12)"/>
+    ${opts.snorkel ? `<rect x="176" y="60" width="9" height="46" rx="4.5" fill="#F4A94A"/><circle cx="180" cy="58" r="8" fill="#F4A94A"/>` : ''}
+    <g>
+      <ellipse cx="72" cy="52" rx="19" ry="22" fill="#fff" stroke="#3D3450" stroke-width="4"/>
+      <ellipse cx="148" cy="52" rx="19" ry="22" fill="#fff" stroke="#3D3450" stroke-width="4"/>
+      <path d="${BODY_PATH}" fill="#fff" stroke="#3D3450" stroke-width="4" stroke-linejoin="round"/>
+      ${opts.beanie ? `<path d="M52 60 C58 22 162 22 168 60 L160 72 C130 50 90 50 60 72 Z" fill="#D8483F"/><circle cx="110" cy="24" r="9" fill="#fff" stroke="#3D3450" stroke-width="3"/>` : ''}
+      ${opts.partyhat ? `<path d="M96 58 L124 58 L110 14 Z" fill="#FF9FB0" stroke="#3D3450" stroke-width="3" stroke-linejoin="round"/><circle cx="110" cy="14" r="6" fill="#FFC94A"/>` : ''}
+      ${opts.goggles ? `<rect x="66" y="98" width="88" height="28" rx="14" fill="#3EC6C0" stroke="#3D3450" stroke-width="3" opacity=".92"/>` : `<circle cx="88" cy="112" r="6.5" fill="#3D3450"/><circle cx="132" cy="112" r="6.5" fill="#3D3450"/>`}
+      <ellipse cx="72" cy="132" rx="12" ry="7" fill="#FFB4A0" opacity=".55"/>
+      <ellipse cx="148" cy="132" rx="12" ry="7" fill="#FFB4A0" opacity=".55"/>
+      <path d="M98 128 Q110 140 122 128" stroke="#3D3450" stroke-width="4" fill="none" stroke-linecap="round"/>
+      ${opts.scarf ? `<path d="M58 150 Q110 170 162 150 L154 175 Q110 190 66 175 Z" fill="#F4A94A"/>` : ''}
+    </g>
+    <ellipse cx="70" cy="196" rx="17" ry="11" fill="#fff" stroke="#3D3450" stroke-width="4"/>
+    <ellipse cx="150" cy="196" rx="17" ry="11" fill="#fff" stroke="#3D3450" stroke-width="4"/>
+    ${opts.skis ? `<g><rect x="14" y="200" width="96" height="8" rx="4" fill="#3EC6C0" stroke="#3D3450" stroke-width="3"/><rect x="110" y="200" width="96" height="8" rx="4" fill="#3EC6C0" stroke="#3D3450" stroke-width="3"/></g>` : ''}
+    ${opts.flippers ? `<g><ellipse cx="70" cy="206" rx="27" ry="10" fill="#3EC6C0" stroke="#3D3450" stroke-width="3"/><ellipse cx="150" cy="206" rx="27" ry="10" fill="#3EC6C0" stroke="#3D3450" stroke-width="3"/></g>` : ''}
+    ${opts.balloon ? `<g><line x1="196" y1="90" x2="172" y2="140" stroke="#3D3450" stroke-width="2"/><ellipse cx="200" cy="62" rx="20" ry="25" fill="#FFC94A" stroke="#3D3450" stroke-width="3"/></g>` : ''}
+  </svg>`;
+}
+/* ---------- mascot 2 — round "mango" capybara with a citrus slice on its head ---------- */
+const CAPY_BODY_PATH = "M 115.0 49.7 C 129.6 49.7, 145.3 57.8, 158.6 64.5 C 172.0 71.2, 188.0 78.9, 195.3 89.8 C 202.6 100.8, 202.3 116.6, 202.3 130.0 C 202.3 143.4, 202.6 159.2, 195.3 170.2 C 188.0 181.1, 172.0 188.8, 158.6 195.5 C 145.3 202.2, 129.6 210.3, 115.0 210.3 C 100.5 210.3, 84.7 202.2, 71.3 195.5 C 58.0 188.8, 42.0 181.1, 34.7 170.2 C 27.4 159.2, 27.7 143.4, 27.7 130.0 C 27.7 116.6, 27.4 100.8, 34.7 89.8 C 42.0 78.9, 58.0 71.2, 71.3 64.5 C 84.7 57.8, 100.5 49.7, 115.0 49.7 Z";
+
+function capybaraSVG(opts){
+  opts = opts || {};
+  return `
+  <svg viewBox="0 0 230 225" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="115" cy="216" rx="60" ry="7" fill="rgba(0,0,0,.12)"/>
+    ${opts.snorkel ? `<rect x="180" y="70" width="9" height="42" rx="4.5" fill="#F4A94A"/><circle cx="184" cy="68" r="8" fill="#F4A94A"/>` : ''}
+    <g>
+      <path d="${CAPY_BODY_PATH}" fill="#E7B15E" stroke="#3D3450" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="62" cy="76" r="15" fill="#D69A45" stroke="#3D3450" stroke-width="3.5"/>
+      <circle cx="168" cy="76" r="15" fill="#D69A45" stroke="#3D3450" stroke-width="3.5"/>
+      <ellipse cx="115" cy="168" rx="46" ry="34" fill="#F5D9A8"/>
+      ${opts.goggles ? `<rect x="72" y="100" width="86" height="27" rx="13.5" fill="#3EC6C0" stroke="#3D3450" stroke-width="3" opacity=".92"/>` : `<circle cx="90" cy="112" r="10" fill="#3D3450"/><circle cx="140" cy="112" r="10" fill="#3D3450"/><circle cx="93" cy="108" r="2.6" fill="#fff"/><circle cx="143" cy="108" r="2.6" fill="#fff"/>`}
+      <circle cx="100" cy="160" r="3" fill="#8A5A24"/>
+      <circle cx="130" cy="160" r="3" fill="#8A5A24"/>
+      <path d="M96 178 Q115 190 134 178" stroke="#3D3450" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <rect x="110" y="176" width="10" height="9" rx="2" fill="#fff" stroke="#3D3450" stroke-width="1.5"/>
+      ${!opts.hideHat ? `<g><line x1="115" y1="49" x2="115" y2="34" stroke="#3D3450" stroke-width="3"/><circle cx="115" cy="26" r="17" fill="#FFA53D" stroke="#3D3450" stroke-width="3"/><circle cx="115" cy="26" r="17" fill="none" stroke="#FFC873" stroke-width="1.5"/><path d="M115 12 L115 40 M102 26 L128 26 M105.5 15.5 L124.5 36.5 M124.5 15.5 L105.5 36.5" stroke="#FFC873" stroke-width="1.4"/><path d="M115 9 Q108 2 100 6" stroke="#4C8C3A" stroke-width="3" fill="none" stroke-linecap="round"/></g>` : ''}
+      ${opts.partyhat ? `<path d="M100 60 L130 60 L115 18 Z" fill="#FF9FB0" stroke="#3D3450" stroke-width="3" stroke-linejoin="round"/><circle cx="115" cy="18" r="6" fill="#FFC94A"/>` : ''}
+    </g>
+    <ellipse cx="76" cy="200" rx="18" ry="11" fill="#E7B15E" stroke="#3D3450" stroke-width="3.5"/>
+    <ellipse cx="154" cy="200" rx="18" ry="11" fill="#E7B15E" stroke="#3D3450" stroke-width="3.5"/>
+    ${opts.flippers ? `<g><ellipse cx="76" cy="208" rx="28" ry="10" fill="#3EC6C0" stroke="#3D3450" stroke-width="3"/><ellipse cx="154" cy="208" rx="28" ry="10" fill="#3EC6C0" stroke="#3D3450" stroke-width="3"/></g>` : ''}
+    ${opts.balloon ? `<g><line x1="200" y1="95" x2="178" y2="145" stroke="#3D3450" stroke-width="2"/><ellipse cx="204" cy="68" rx="20" ry="25" fill="#8FD3F4" stroke="#3D3450" stroke-width="3"/></g>` : ''}
+  </svg>`;
+}
+
+document.getElementById('mascot0').innerHTML =
+  `<div class="half">${puppySVG({})}</div><div class="half">${capybaraSVG({})}</div>`;
+document.getElementById('lockMascot').innerHTML = puppySVG({});
+document.getElementById('mascot2').innerHTML = puppySVG({beanie:true, scarf:true, skis:true});
+document.getElementById('mascot3').innerHTML = capybaraSVG({goggles:true, snorkel:true, flippers:true});
+document.getElementById('mascot5').innerHTML =
+  `<div class="half">${puppySVG({partyhat:true, balloon:true, scarf:true})}</div><div class="half">${capybaraSVG({partyhat:true, hideHat:false})}</div>`;
+
+/* ---------- message she can leave back, saved on this device ---------- */
+const MSG_KEY = 'bday_message_for_' + CONFIG.name.replace(/\s+/g,'_');
+const savedMsg = localStorage.getItem(MSG_KEY);
+if(savedMsg){ document.getElementById('message-input').value = savedMsg; }
+
+function saveMessage(){
+  const val = document.getElementById('message-input').value.trim();
+  const statusEl = document.getElementById('message-status');
+  if(!val){ statusEl.textContent = 'Write something first 🙂'; return; }
+  localStorage.setItem(MSG_KEY, val);
+  const finish = (copied)=>{
+    statusEl.textContent = copied
+      ? 'Saved, and copied — paste it back to me whenever ✓'
+      : 'Saved on this device ✓ (copy it yourself to send it to me)';
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(val).then(()=>finish(true)).catch(()=>finish(false));
+  } else {
+    finish(false);
+  }
+}
+
+/* ---------- navigation ---------- */
+const total = 6;
+let current = 0;
+const stage = document.getElementById('stage');
+const dotsEl = document.getElementById('dots');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const lightScenes = new Set([2,3,5]);
+
+for(let i=0;i<total;i++){
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0 ? ' active' : '');
+  dotsEl.appendChild(d);
+}
+
+function goTo(i){
+  if(i<0 || i>=total) return;
+  current = i;
+  stage.style.transform = `translateX(-${i*(100/total)}%)`;
+  [...dotsEl.children].forEach((d,idx)=> d.classList.toggle('active', idx===i));
+  prevBtn.hidden = (i===0);
+  nextBtn.hidden = (i===total-1);
+  document.body.classList.toggle('light-scene-active', lightScenes.has(i));
+  if(i===total-1) setTimeout(burstConfetti, 250);
+}
+goTo(0);
+
+let touchX = null;
+document.addEventListener('touchstart', e=>{ touchX = e.touches[0].clientX; });
+document.addEventListener('touchend', e=>{
+  if(touchX===null) return;
+  const target = e.target.closest('.gallery-scroll');
+  if(target) { touchX = null; return; }
+  const dx = e.changedTouches[0].clientX - touchX;
+  if(Math.abs(dx) > 50){ dx < 0 ? goTo(current+1) : goTo(current-1); }
+  touchX = null;
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight') goTo(current+1);
+  if(e.key==='ArrowLeft') goTo(current-1);
+});
+
+const snowfall = document.getElementById('snowfall');
+for(let i=0;i<26;i++){
+  const f = document.createElement('div');
+  f.className = 'flake';
+  const size = 3 + Math.random()*5;
+  f.style.width = f.style.height = size+'px';
+  f.style.left = Math.random()*100+'%';
+  f.style.animationDuration = (6+Math.random()*8)+'s';
+  f.style.animationDelay = (Math.random()*8)+'s';
+  snowfall.appendChild(f);
+}
+
+const bubbles = document.getElementById('bubbles');
+for(let i=0;i<20;i++){
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  const size = 6 + Math.random()*16;
+  b.style.width = b.style.height = size+'px';
+  b.style.left = Math.random()*100+'%';
+  b.style.animationDuration = (5+Math.random()*7)+'s';
+  b.style.animationDelay = (Math.random()*6)+'s';
+  bubbles.appendChild(b);
+}
+
+const confettiColors = ['#FF9FB0','#FFC94A','#8FD3F4','#3EC6C0','#FFB4A0'];
+function burstConfetti(){
+  const layer = document.getElementById('confetti');
+  layer.innerHTML = '';
+  for(let i=0;i<60;i++){
+    const c = document.createElement('div');
+    c.className = 'confetto';
+    c.style.left = Math.random()*100+'%';
+    c.style.background = confettiColors[Math.floor(Math.random()*confettiColors.length)];
+    c.style.animationDelay = (Math.random()*0.6)+'s';
+    c.style.animationDuration = (2+Math.random()*1.2)+'s';
+    layer.appendChild(c);
+  }
+  setTimeout(()=>{ layer.innerHTML=''; }, 3200);
+}
+
+function nextBirthday(){
+  const now = new Date();
+  let year = now.getFullYear();
+  let target = new Date(year, CONFIG.birthdayMonth-1, CONFIG.birthdayDay, 0,0,0);
+  if(target < now){ target = new Date(year+1, CONFIG.birthdayMonth-1, CONFIG.birthdayDay,0,0,0); }
+  return target;
+}
+function updateCountdown(){
+  const diff = nextBirthday() - new Date();
+  if(diff <= 0){
+    document.getElementById('cd-days').textContent = '🎉';
+    document.getElementById('cd-hours').textContent = '';
+    document.getElementById('cd-mins').textContent = '';
+    return;
+  }
+  const days = Math.floor(diff/86400000);
+  const hours = Math.floor((diff%86400000)/3600000);
+  const mins = Math.floor((diff%3600000)/60000);
+  document.getElementById('cd-days').textContent = String(days).padStart(2,'0');
+  document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+  document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 30000);
+
+</script>
+</body>
+</html>
